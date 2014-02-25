@@ -1,6 +1,6 @@
 RETDO - The backup retention SwissKnife
 
-retdo is a simple Shell script that allows administrators to clean files on a custom retention basics. retdo can be used to implement production's backups retention plans.
+retdo is a simple Shell script that allows administrators to clean up files on a custom retention basics. retdo can be used to implement production's backups retention plans.
 
 retdo can resolv the following queries :
 
@@ -16,7 +16,7 @@ You'll find the options list below, nevertheless always keep that in mind :
 - Default action is to DELETE files, if you tell retdo to keep 1 file per week then 1 file per week will be kept and the other will be deleted. If you want to copy, move, scp, etc, use the -a option.
 
 
-##########################################################################################################################################
+######################################################################################
 
 
 Usage : retdo OPTIONS
