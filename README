@@ -2,10 +2,10 @@ RETDO - The backup retention SwissKnife
 
 retdo is a simple Shell script that allows administrators to clean up files on a custom retention basics. retdo can be used to implement production's backups retention plans.
 
-retdo can resolv the following queries :
+retdo can resolve the following queries :
 
 - I want to keep only one file per week if files are older than 3 months up to 6 months.
-- I want to keep only one file per months if files are older than 6 months up to 1 year.
+- I want to keep only one file per month if files are older than 6 months up to 1 year.
 - I want files older than 1 year to be moved to another machine.
 - I want a cup of tea (feature in progress)
 
