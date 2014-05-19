@@ -15,11 +15,11 @@ retdo can resolve the following queries :
 
 You'll find the options list below, nevertheless always keep that in mind : 
 
-* ALWAYS use the simulate option (-s), this option will tell you which files will be processed. When you are happy with the results, you can go ahead and run the script for real.
+* __ALWAYS__ use the simulate option (-s), this option will tell you which files will be processed. When you are happy with the results, you can go ahead and run the script for real.
 
-* It is STRONGLY recommended to use the regexp option (-r), by default retdo process all files (*) of a given directory as they were the same. If you have backup files (.tgz or .gpg) and MD5 files, you need to run retdo two times, one for the backup files and one for the MD5 files. Again use -s beforehand to check the results.
+* It is __STRONGLY__ recommended to use the regexp option (-r), by default retdo process all files (*) of a given directory as they were the same. If you have backup files (.tgz or .gpg) and MD5 files, you need to run retdo __two times__, one for the backup files and one for the MD5 files. Again use -s beforehand to check the results.
 
-* Default action is to DELETE files, if you tell retdo to keep 1 file per week then 1 file per week will be kept and the other will be deleted. If you want to copy, move, scp, etc, use the -a option.
+* Default action is to __DELETE__ files, if you tell retdo to keep 1 file per week then 1 file per week will be kept and the other will be deleted. If you want to copy, move, scp, etc, use the -a option.
 
 ```
 Usage : retdo OPTIONS
