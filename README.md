@@ -2,7 +2,7 @@
 
 retdo is a simple Shell script that allows administrators to clean up files on a custom retention basics. retdo can be used to implement production's backups retention plans.
 
-# WHAT CAN I DO
+## WHAT CAN I DO
 
 retdo can resolve the following queries :
 
@@ -11,7 +11,7 @@ retdo can resolve the following queries :
 * I want files older than 1 year to be moved to another machine.
 * I want a cup of tea (feature in progress)
 
-# USAGE
+## USAGE
 
 You'll find the options list below, nevertheless always keep that in mind : 
 
