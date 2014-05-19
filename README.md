@@ -1,26 +1,27 @@
-RETDO - The backup retention SwissKnife
+# RETDO - The backup retention SwissKnife
 
 retdo is a simple Shell script that allows administrators to clean up files on a custom retention basics. retdo can be used to implement production's backups retention plans.
 
+# WHAT CAN I DO
+
 retdo can resolve the following queries :
 
-- I want to keep only one file per week if files are older than 3 months up to 6 months.
-- I want to keep only one file per month if files are older than 6 months up to 1 year.
-- I want files older than 1 year to be moved to another machine.
-- I want a cup of tea (feature in progress)
+* I want to keep only one file per week if files are older than 3 months up to 6 months.
+* I want to keep only one file per month if files are older than 6 months up to 1 year.
+* I want files older than 1 year to be moved to another machine.
+* I want a cup of tea (feature in progress)
+
+# USAGE
 
 You'll find the options list below, nevertheless always keep that in mind : 
 
-- ALWAYS use the simulate option (-s), this option will tell you which files will be processed. When you are happy with the results, you can go ahead and run the script for real.
+* ALWAYS use the simulate option (-s), this option will tell you which files will be processed. When you are happy with the results, you can go ahead and run the script for real.
 
-- It is STRONGLY recommended to use the regexp option (-r), by default retdo process all files (*) of a given directory as they were the same. If you have backup files (.tgz or .gpg) and MD5 files, you need to run retdo two times, one for the backup files and one for the MD5 files. Again use -s beforehand to check the results.
+* It is STRONGLY recommended to use the regexp option (-r), by default retdo process all files (*) of a given directory as they were the same. If you have backup files (.tgz or .gpg) and MD5 files, you need to run retdo two times, one for the backup files and one for the MD5 files. Again use -s beforehand to check the results.
 
-- Default action is to DELETE files, if you tell retdo to keep 1 file per week then 1 file per week will be kept and the other will be deleted. If you want to copy, move, scp, etc, use the -a option.
+* Default action is to DELETE files, if you tell retdo to keep 1 file per week then 1 file per week will be kept and the other will be deleted. If you want to copy, move, scp, etc, use the -a option.
 
-
-######################################################################################
-
-
+```
 Usage : retdo OPTIONS
         Cleanup files with custom retention periods.
 
@@ -65,3 +66,4 @@ retdo Usage examples :
 * Parse all files in /data/backups/DB that are older than 6 months (182 days) and younger than 1 year(364 days) then keep one file per month (30 days) and move the others to /data/backups/DB/old/ :
         $ retdo -p /data/backups/DB -b 182 -e 364 -d 7 -a "mv MATCH_FILE /data/backups/DB/old/"
 
+```
