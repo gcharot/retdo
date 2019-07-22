@@ -16,7 +16,7 @@
     # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
  
-PARSED_OPTIONS=$(getopt -n "$0"  -o hp:a:b:e:r:d:vs --long "help,path:,action:,before:,end:,regexp:,delta:,verbose,simulate"  -- "$@")
+PARSED_OPTIONS=$(getopt -n "$0"  -o hp:a:b:e:r:d:vs --long "help,path:,action:,begin:,end:,regexp:,delta:,verbose,simulate"  -- "$@")
 
 
 function usage()
