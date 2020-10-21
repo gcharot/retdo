@@ -15,84 +15,86 @@
     # You should have received a copy of the GNU General Public License
     # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
- 
-PARSED_OPTIONS=$(getopt -n "$0"  -o hp:a:b:e:r:d:vs --long "help,path:,action:,begin:,end:,regexp:,delta:,verbose,simulate"  -- "$@")
+
+PARSED_OPTIONS=$(getopt -n "$0"  -o hp:a:b:e:r:d:vsm:t: --long "help,path:,action:,begin:,end:,regexp:,delta:,verbose,simulate,maxdepth:,type:"  -- "$@")
 
 
 function usage()
 {
-	echo "Usage : $(basename $0) OPTIONS
-	Cleanup files with custom retention periods.
-	
-	-a, --action \"cmd MATCH_FILE\"	Execute custom action (optional : Use \"rm -f MATCH_FILE\" by default).
-	-b, --begin N			Cleanup files older than N DAYS (required)
-	-d, --delta N			Keep one file every N DAYS (required). delta=1 means delete all files.
-	-e, --end N			Cleanup files younger than N DAYS (required)
-	-h, --help			Display this help and exit
-	-p, --path PATH			Path to files (required). $(basename $0) delete only files NOT directories
-	-r, --regexp \"REGEXP\"		Files mathing REGEXP only (optional : Use * by default)
-	-s, --simulate			Don't make any action, just simulate (optional implies -v)
-	-v, --verbose			Print debug information (optional)
-	
+        echo "Usage : $(basename $0) OPTIONS
+        Cleanup files with custom retention periods.
 
-Actions : 
+        -a, --action \"cmd MATCH_FILE\" Execute custom action (optional : Use \"rm -f MATCH_FILE\" by default).
+        -b, --begin N                   Cleanup files older than N DAYS (required)
+        -d, --delta N                   Keep one file every N DAYS (required). delta=1 means delete all files.
+        -e, --end N                     Cleanup files younger than N DAYS (required)
+        -h, --help                      Display this help and exit
+  -m, --maxdepth N    Limit search to depth
+        -p, --path PATH                 Path to files (required). $(basename $0) delete only files NOT directories
+        -r, --regexp \"REGEXP\"         Files mathing REGEXP only (optional : Use * by default)
+        -s, --simulate                  Don't make any action, just simulate (optional implies -v)
+  -t, --type C    Specify file type (default is f)
+        -v, --verbose                   Print debug information (optional)
+
+
+Actions :
 Default action is to delete files matching the specified retention values. For example if you tell $(basename $0) to keep 1 file per week then 1 file per week will be kept and the other will be deleted.
 You can configure $(basename $0) to make any other action you like. However you will need to enter the full command like you would normally do in a shell; just replace the filename part with the MATCH_FILE expression.
 
 Exemples :
 * Move files to /data/backups/old/ :
-	-a \"mv MATCH_FILE /data/backups/old/\"
+        -a \"mv MATCH_FILE /data/backups/old/\"
 * Copy files to a remote server
-	-a \"scp MATCH_FILE user@remote:/data/backups/old/\"
+        -a \"scp MATCH_FILE user@remote:/data/backups/old/\"
 
 Restrictions :
 * Your filenames/path must NOT containt the string MATCH_FILE.
 * Your filenames/path must NOT containt the '#' character
 * Always check your custom commands with the simulation feature (-s)
-	
-	
-$(basename $0) Usage examples : 
+
+
+$(basename $0) Usage examples :
 
 * Parse all files named *.tgz in /data/backups/DB that are older than 3 months (90 days) and younger than 6 months (181 days) then keep only one file per week (7days) :
-	$ $(basename $0) -p /data/backups/DB -r \"*.tgz\" -b 90 -e 181 -d 7
+        $ $(basename $0) -p /data/backups/DB -r \"*.tgz\" -b 90 -e 181 -d 7
 
 * Same thing but don't do any action just show me what you would have done (simulate) :
-	$ $(basename $0) -p /data/backups/DB -r \"*.tgz\" -b 90 -e 181 -d 7 -s
-	
+        $ $(basename $0) -p /data/backups/DB -r \"*.tgz\" -b 90 -e 181 -d 7 -s
+
 * Delete all files named *.tgz in /data/backups/DB that are older than 3 months (182 days) and younger than 1 year (365 days) :
-	$ $(basename $0) -p /data/backups/DB -r \"*.tgz\" -b 182 -e 365 -d 1
+        $ $(basename $0) -p /data/backups/DB -r \"*.tgz\" -b 182 -e 365 -d 1
 
 * Parse all files in /data/backups/DB that are older than 6 months (182 days) and younger than 1 year(364 days) then keep one file per month (30 days) and move the others to /data/backups/DB/old/ :
-	$ $(basename $0) -p /data/backups/DB -b 182 -e 364 -d 7 -a \"mv MATCH_FILE /data/backups/DB/old/\"
+        $ $(basename $0) -p /data/backups/DB -b 182 -e 364 -d 7 -a \"mv MATCH_FILE /data/backups/DB/old/\"
 
-	"
-	
-	exit 1
+        "
+
+        exit 1
 }
 
 
 function do_action()
-{	
-	while read file
-	do
-		# Generate next action - replace MATCH_FILE with $file
-		next_action=$(echo $action | sed 's#MATCH_FILE#'"$file"'#g')
-	
-		test $DEBUG -eq 1 && echo -n "Executing $next_action ..."
-		
-		# Jump to next iteration if SIMULATE FLAG IS ON
-		test $SIMUL -eq 1 &&  test $DEBUG -eq 1 && echo -e " SIMULATE\n" && continue
-		
-		# Exec action / Get result
-		if(  `$next_action` ); then
-			test $DEBUG -eq 1 && echo -e " DONE\n"
-			done_files=$(($done_files + 1))
-		else
-			test $DEBUG -eq 1 && echo -e " FAILED\n"
-			error_files=$(($error_files + 1))
-		fi	
-	done
-	}
+{
+        while read file
+        do
+                # Generate next action - replace MATCH_FILE with $file
+                next_action=$(echo $action | sed 's#MATCH_FILE#'"$file"'#g')
+
+                test $DEBUG -eq 1 && echo -n "Executing $next_action ..."
+
+                # Jump to next iteration if SIMULATE FLAG IS ON
+                test $SIMUL -eq 1 &&  test $DEBUG -eq 1 && echo -e " SIMULATE\n" && continue
+
+                # Exec action / Get result
+                if(  `$next_action` ); then
+                        test $DEBUG -eq 1 && echo -e " DONE\n"
+                        done_files=$(($done_files + 1))
+                else
+                        test $DEBUG -eq 1 && echo -e " FAILED\n"
+                        error_files=$(($error_files + 1))
+                fi
+        done
+        }
 
 
 ###### MAIN ######
@@ -103,76 +105,83 @@ if [ $? -ne 0 ];
 then
   exit 1
 fi
- 
+
 eval set -- "$PARSED_OPTIONS"
 
 while true;
 do
   case "$1" in
- 
+
     -h|--help)
       usage
-	  shift;;
- 
+            shift
+    ;;
     -p|--path)
-      if [ -n "$2" ];
-      then
-		if [ ! -d $2 ]; then
-			echo -e "ERROR: $2 is not a directory\n"
-			usage
-		else
-			path=$2
-		fi
+      if [ -n "$2" ]; then
+                    if [ ! -d $2 ]; then
+                        echo -e "ERROR: $2 is not a directory\n"
+                        usage
+                else
+                        path=$2
+                    fi
       fi
-      shift 2;;
-	  
-	-r|--regexp)
-      if [ -n "$2" ];
-      then
-		regexp=$2
+      shift 2
+    ;;
+          -r|--regexp)
+      if [ -n "$2" ]; then
+                regexp=$2
       fi
-      shift 2;;
-	  
-	-a|--action)
-      if [ -n "$2" ];
-      then
-		action=$2
+      shift 2
+    ;;
+          -a|--action)
+      if [ -n "$2" ]; then
+                action=$2
       fi
-	  shift 2;;
-	  
-    -b|--begin)
-      if [ -n "$2" ];
-      then
-		begin_bound=$2
+            shift 2
+    ;;
+          -b|--begin)
+      if [ -n "$2" ]; then
+                begin_bound=$2
       fi
-      shift 2;;
-
+      shift 2
+    ;;
     -e|--end)
-      if [ -n "$2" ];
-      then
-		end_bound=$2
+      if [ -n "$2" ]; then
+                end_bound=$2
       fi
-      shift 2;;
-	  
-	-d|--delta)
-      if [ -n "$2" ];
-      then
-		delta=$2
+      shift 2
+    ;;
+          -d|--delta)
+      if [ -n "$2" ]; then
+                delta=$2
       fi
-	  shift 2;;
-	 
-	-v|--verbose)
+          shift 2
+    ;;
+         -v|--verbose)
       DEBUG=1
-      shift;;
-	  
-	 -s|--simulate)
-      SIMUL=1
-      DEBUG=1  # -s implies -v
-      shift;;
-	
-    --)
       shift
-      break;;
+    ;;
+          -s|--simulate)
+       SIMUL=1
+       DEBUG=1  # -s implies -v
+       shift
+    ;;
+          -t|--type)
+       if [ -n "$2" ]; then
+                     type=$2
+       fi
+       shift 2
+    ;;
+    -m|--maxdepth)
+      if [ -n "$2" ]; then
+                    maxdepth=$2
+      fi
+      shift 2
+    ;;
+     --)
+       shift
+       break
+    ;;
   esac
 done
 
@@ -184,43 +193,59 @@ SIMUL=${SIMUL:=0}
 regexp=${regexp:=*} # Match all if regexp is not supplied by user input
 action=${action:="rm -f MATCH_FILE"} # Default action is rm -f if not supplied by user input
 
+maxdepth=${maxdepth:=0} # Default maxdepth to 0
+type=${type:="f"} # Default file type is file
+
+type=$(echo $type | tr [A-Z] [a-z]) # Make sure type is lowercase
+
 # Check user input
 if [ -z "$delta" -o -z "$end_bound" -o -z "$begin_bound" -o -z "$path" ]; then
-	echo -e "There is something wrong with your command input, remember option -p, -b, -e and -d are mandatory\n"
-	usage
+        echo -e "There is something wrong with your command input, remember option -p, -b, -e and -d are mandatory\n"
+        usage
 fi
 
 
 # Check that user has not misunderstood begin/end bounds
 if [ $begin_bound -ge $end_bound -o $begin_bound -lt 0 -o $end_bound -le 0 -o $(($end_bound - $begin_bound)) -lt $delta ]; then
-	echo -e "ERROR : You have an issue with your bondaries values. Check they are not negative, that you begin boundary is not greater than you end boundary or that your delta is not greater than your boundaries.\n"
-	usage
+        echo -e "ERROR : You have an issue with your bondaries values. Check they are not negative, that you begin boundary is not greater than you end boundary or that your delta is not greater than your boundaries.\n"
+        usage
+fi
+
+# Check that type is one character
+if [[ ! $type =~ ^[a-z]$ ]]; then
+  echo -e "ERROR : type must be a single alpha character"
+  usage
+fi
+# Check that maxdepth is an integer
+if [[ ! $maxdepth =~ ^[0-9]+$ ]]; then
+  echo -e "ERROR : maxdepth must be a positive integer"
+  usage
 fi
 
 ### Check delta and boundaries optimisations
 
 # Delta cannot be zero
 if [ $delta -le 0 ]; then
-	echo "Delta cannot be 0 or below"
-	usage
+        echo "Delta cannot be 0 or below"
+        usage
 # If delta = 1 :  delete all files from begin to end bound so let set the tail -n option to +1
 elif [ $delta -eq 1 ]; then
-	test $DEBUG -eq 1 && echo -e "---- I'm going to delete every files in $path named $regexp older than $begin_bound days up to $end_bound days ----\n"
-	tail_opt=1
-	delta_gap=0			# Don't care if delta = 1
+        test $DEBUG -eq 1 && echo -e "---- I'm going to delete every files in $path named $regexp older than $begin_bound days up to $end_bound days ----\n"
+        tail_opt=1
+        delta_gap=0                     # Don't care if delta = 1
 # If delta > 1 calculate boundaries optimisations
 else
-	test $DEBUG -eq 1 && echo -e "---- I'm going to parse every files in $path named $regexp older than $begin_bound days up to $end_bound days and keep only one file every $delta days ----\n"
-	delta_gap=$((($end_bound - $begin_bound)%$delta))
-	tail_opt=2
+        test $DEBUG -eq 1 && echo -e "---- I'm going to parse every files in $path named $regexp older than $begin_bound days up to $end_bound days and keep only one file every $delta days ----\n"
+        delta_gap=$((($end_bound - $begin_bound)%$delta))
+        tail_opt=2
 fi
 
 # Print optimisation warning in case of non optimized boundaries
 if [ $delta_gap -ne 0 ]; then
-	echo "WARNING : Your boundaries/delta are not optimals, which means that $delta_gap files will never be processed. 
-	Use the following check to optimize your boundaries : 
-			(end_bound - begin_bound) % delta should be equal to 0. 
-	In your case ($end_bound - $begin_bound) % $delta = $delta_gap. You can either subtract $delta_gap days from one of your boundary OR add $(($delta - $delta_gap)) days."
+        echo "WARNING : Your boundaries/delta are not optimals, which means that $delta_gap files will never be processed.
+        Use the following check to optimize your boundaries :
+                        (end_bound - begin_bound) % delta should be equal to 0.
+        In your case ($end_bound - $begin_bound) % $delta = $delta_gap. You can either subtract $delta_gap days from one of your boundary OR add $(($delta - $delta_gap)) days."
 fi
 
 
@@ -232,10 +257,28 @@ error_files=0
 ###  Find all files older than begin_bound AND younger than (begin_bound + delta i.e late_bound). From this list keep the most recent file and do something on the others. Keep adding delta to begin_bound and late_bound until begin_bound + delta is greater or equal to end_bound.
 
 while [ $(($begin_bound + $delta)) -le $end_bound ]; do
-	late_bound=$(($begin_bound + $delta))
-    test $DEBUG -eq 1 && echo "--- Parsing files from $begin_bound days up to $((${late_bound} + 1)) days" && echo -e "Retrieving list via -> find $path -type f -name \"${regexp}\" -mtime +${begin_bound} -mtime -$((${late_bound} + 1)) | xargs -r ls -1t | tail -n +${tail_opt} \n"
-    # List files that require an action and send list to do_action function.
-	do_action < <(find $path -type f -name "${regexp}" -mtime +${begin_bound} -mtime -$((${late_bound} + 1))  | xargs -r ls -1t | tail -n +${tail_opt})
+        late_bound=$(($begin_bound + $delta))
+    if [ $maxdepth -eq 0 ]; then
+      if [ $type == "d" ]; then
+        test $DEBUG -eq 1 && echo "--- Parsing files from $begin_bound days up to $((${late_bound} + 1)) days" && echo -e "Retrieving list via -> find $path -type ${type} -name \"${regexp}\" -mtime +${begin_bound} -mtime -$((${late_bound} + 1)) | xargs -r ls -1td | tail -n +${tail_opt} \n"
+        # List files that require an action and send list to do_action function.
+          do_action < <(find $path -type ${type} -name "${regexp}" -mtime +${begin_bound} -mtime -$((${late_bound} + 1))  | xargs -r ls -1td | tail -n +${tail_opt})
+      else
+        test $DEBUG -eq 1 && echo "--- Parsing files from $begin_bound days up to $((${late_bound} + 1)) days" && echo -e "Retrieving list via -> find $path -type ${type} -name \"${regexp}\" -mtime +${begin_bound} -mtime -$((${late_bound} + 1)) | xargs -r ls -1t | tail -n +${tail_opt} \n"
+        # List files that require an action and send list to do_action function.
+          do_action < <(find $path -type ${type} -name "${regexp}" -mtime +${begin_bound} -mtime -$((${late_bound} + 1))  | xargs -r ls -1t | tail -n +${tail_opt})
+      fi
+    else
+      if [ $type == "d" ]; then
+        test $DEBUG -eq 1 && echo "--- Parsing files from $begin_bound days up to $((${late_bound} + 1)) days" && echo -e "Retrieving list via -> find $path -maxdepth ${maxdepth} -type ${type} -name \"${regexp}\" -mtime +${begin_bound} -mtime -$((${late_bound} + 1)) | xargs -r ls -1td | tail -n +${tail_opt} \n"
+        # List files that require an action and send list to do_action function.
+            do_action < <(find $path -maxdepth ${maxdepth} -type ${type} -name "${regexp}" -mtime +${begin_bound} -mtime -$((${late_bound} + 1))  | xargs -r ls -1td | tail -n +${tail_opt})
+      else
+        test $DEBUG -eq 1 && echo "--- Parsing files from $begin_bound days up to $((${late_bound} + 1)) days" && echo -e "Retrieving list via -> find $path -maxdepth ${maxdepth} -type ${type} -name \"${regexp}\" -mtime +${begin_bound} -mtime -$((${late_bound} + 1)) | xargs -r ls -1t | tail -n +${tail_opt} \n"
+        # List files that require an action and send list to do_action function.
+            do_action < <(find $path -maxdepth ${maxdepth} -type ${type} -name "${regexp}" -mtime +${begin_bound} -mtime -$((${late_bound} + 1))  | xargs -r ls -1t | tail -n +${tail_opt})
+      fi
+    fi
     begin_bound=$late_bound
 done
 
