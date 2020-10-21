@@ -29,11 +29,11 @@ function usage()
         -d, --delta N                   Keep one file every N DAYS (required). delta=1 means delete all files.
         -e, --end N                     Cleanup files younger than N DAYS (required)
         -h, --help                      Display this help and exit
-  -m, --maxdepth N    Limit search to depth
+        -m, --maxdepth N                Limit search to depth
         -p, --path PATH                 Path to files (required). $(basename $0) delete only files NOT directories
         -r, --regexp \"REGEXP\"         Files mathing REGEXP only (optional : Use * by default)
         -s, --simulate                  Don't make any action, just simulate (optional implies -v)
-  -t, --type C    Specify file type (default is f)
+        -t, --type C                    Specify file type (default is f)
         -v, --verbose                   Print debug information (optional)
 
 
@@ -111,70 +111,69 @@ eval set -- "$PARSED_OPTIONS"
 while true;
 do
   case "$1" in
-
     -h|--help)
       usage
-            shift
+      shift
     ;;
     -p|--path)
       if [ -n "$2" ]; then
-                    if [ ! -d $2 ]; then
-                        echo -e "ERROR: $2 is not a directory\n"
-                        usage
-                else
-                        path=$2
-                    fi
+        if [ ! -d $2 ]; then
+          echo -e "ERROR: $2 is not a directory\n"
+          usage
+        else
+          path=$2
+        fi
       fi
       shift 2
     ;;
-          -r|--regexp)
+    -r|--regexp)
       if [ -n "$2" ]; then
-                regexp=$2
+        regexp=$2
       fi
       shift 2
     ;;
-          -a|--action)
+    -a|--action)
       if [ -n "$2" ]; then
-                action=$2
+        action=$2
       fi
-            shift 2
+      shift 2
     ;;
-          -b|--begin)
+    -b|--begin)
       if [ -n "$2" ]; then
-                begin_bound=$2
+        begin_bound=$2
       fi
       shift 2
     ;;
     -e|--end)
       if [ -n "$2" ]; then
-                end_bound=$2
+        end_bound=$2
       fi
       shift 2
     ;;
-          -d|--delta)
+    -d|--delta)
       if [ -n "$2" ]; then
-                delta=$2
+        delta=$2
       fi
-          shift 2
+      shift 2
     ;;
-         -v|--verbose)
+    -v|--verbose)
       DEBUG=1
       shift
     ;;
-          -s|--simulate)
+    -s|--simulate)
        SIMUL=1
        DEBUG=1  # -s implies -v
        shift
     ;;
-          -t|--type)
+    -t|--type)
        if [ -n "$2" ]; then
-                     type=$2
+        type=$2
        fi
        shift 2
     ;;
     -m|--maxdepth)
       if [ -n "$2" ]; then
-                    maxdepth=$2
+        maxdepth=$2
       fi
       shift 2
     ;;
